@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS:GO Web Experience</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #0b0e14;
+            font-family: 'Stratum2', 'Arial', sans-serif;
+            user-select: none;
+        }
+
+        /* --- MENU PRINCIPAL ESTILO CS:GO --- */
+        #main-menu {
+            position: absolute;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+            display: flex;
+            z-index: 100;
+        }
+
+        .menu-sidebar {
+            width: 320px;
+            background: rgba(13, 17, 23, 0.95);
+            border-right: 2px solid #30363d;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-shadow: 5px 0 20px rgba(0,0,0,0.5);
+        }
+
+        .menu-logo {
+            font-size: 28px;
+            font-weight: 900;
+            color: #ff9900;
+            letter-spacing: 2px;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #ff9900;
+            padding-bottom: 10px;
+        }
+
+        .menu-btn {
+            background: #21262d;
+            color: #c9d1d9;
+            border: none;
+            padding: 15px 20px;
+            margin-bottom: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: left;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .menu-btn:hover {
+            background: #30363d;
+            color: #ffffff;
+            border-left-color: #ff9900;
+            transform: translateX(5px);
+        }
+
+        .menu-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle, rgba(33,38,45,0.4) 0%, rgba(11,14,20,1) 80%);
+        }
+
+        .play-big-btn {
+            background: linear-gradient(90deg, #ff9900, #ff5500);
+            color: white;
+            border: none;
+            padding: 20px 60px;
+            font-size: 24px;
+            font-weight: 900;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            box-shadow: 0 0 25px rgba(255,153,0,0.4);
+            transition: 0.2s;
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
+        }
+        .play-big-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 35px rgba(255,153,0,0.8);
+        }
+
+        /* --- TELA DE ESCOLHA DE EQUIPE --- */
+        #team-select {
+            position: absolute;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 90;
+            gap: 50px;
+        }
+
+        .team-card {
+            width: 300px;
+            height: 400px;
+            background: #161b22;
+            border: 2px solid #30363d;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.3s;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .team-card.ct:hover { border-color: #00a2ff; box-shadow: 0 0 20px rgba(0,162,255,0.5); }
+        .team-card.tr:hover { border-color: #ffaa00; box-shadow: 0 0 20px rgba(255,170,0,0.5); }
+        .team-card h2 { color: white; margin-bottom: 10px; }
+
+        /* --- HUD DE JOGO (IGN) --- */
+        #game-hud {
+            position: absolute;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            display: none;
+        }
+
+        #crosshair {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 8px; height: 8px;
+            transform: translate(-50%, -50%);
+        }
+        #crosshair::before, #crosshair::after {
+            content: ''; position: absolute; background: #00ff00;
+        }
+        #crosshair::before { top: 3px; left: -6px; width: 20px; height: 2px; }
+        #crosshair::after { top: -6px; left: 3px; width: 2px; height: 20px; }
+
+        .hud-panel {
+            position: absolute;
+            background: rgba(15, 20, 25, 0.75);
+            border-top: 3px solid #ff9900;
+            padding: 10px 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #hud-bottom-right {
+            bottom: 20px; right: 20px;
+            border-top-color: #00ffcc;
+        }
+
+        #hud-bottom-left {
+            bottom: 20px; left: 20px;
+            border-top-color: #ff5500;
+        }
+
+        .hud-label { font-size: 11px; color: #8b949e; display: block; }
+        
+        #radar {
+            position: absolute;
+            top: 20px; left: 20px;
+            width: 160px; height: 160px;
+            background: rgba(10, 15, 20, 0.8);
+            border: 2px solid #30363d;
+            border-radius: 50%;
+        }
+
+        #buy-menu-hint {
+            position: absolute;
+            top: 20px; left: 50%;
+            transform: translateX(-50%);
+            color: #fff; background: rgba(0,0,0,0.6);
+            padding: 5px 15px; border-radius: 4px; font-size: 14px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+    <!-- MENU PRINCIPAL -->
+    <div id="main-menu">
+        <div class="menu-sidebar">
+            <div class="menu-logo">CS:GO Browser</div>
+            <button class="menu-btn" onclick="alert('Inventário: AK-47 | Redline (StatTrak™)')">Inventário</button>
+            <button class="menu-btn" onclick="alert('Patente: Global Elite (5.000 Horas)')">Perfil & Patente</button>
+            <button class="menu-btn" onclick="alert('Configurações de Vídeo e Sensibilidade salvas.')">Opções</button>
+        </div>
+        <div class="menu-content">
+            <h1 style="color: white; margin-bottom: 20px; letter-spacing: 5px;">GLOBAL OFFENSIVE</h1>
+            <button class="play-btn play-big-btn" onclick="openTeamSelect()">JOGAR PARTIDA</button>
+        </div>
+    </div>
+
+    <!-- ESCOLHA DE EQUIPE -->
+    <div id="team-select">
+        <div class="team-card tr" onclick="startGame('TR')">
+            <h2 style="color: #ffaa00;">TERRORISTAS</h2>
+            <p style="color: #8b949e; font-size: 14px;">Equipados com AK-47 e C4. Seu objetivo é explodir os bombsites ou eliminar os CTs.</p>
+        </div>
+        <div class="team-card ct" onclick="startGame('CT')">
+            <h2 style="color: #00a2ff;">CONTRATERRORISTAS</h2>
+            <p style="color: #8b949e; font-size: 14px;">Equipados com M4A4 e Kit de Desarme. Proteja os locais de bomba.</p>
+        </div>
+    </div>
+
+    <!-- HUD DE JOGO -->
+    <div id="game-hud">
+        <div id="crosshair"></div>
+        <div id="radar"></div>
+        <div id="buy-menu-hint">Pressione <kbd>M</kbd> para alternar mapa | <kbd>R</kbd> Recarregar</div>
+        
+        <div id="hud-bottom-left" class="hud-panel">
+            <div><span class="hud-label">SAÚDE</span><span id="health" style="color: #00ff00; font-size: 26px;">100</span></div>
+            <div style="border-left: 1px solid #30363d; padding-left: 15px;"><span class="hud-label">COLETE</span><span style="font-size: 26px;">100</span></div>
+        </div>
+
+        <div id="hud-bottom-right" class="hud-panel">
+            <div><span class="hud-label">MUNIÇÃO</span><span id="ammo" style="font-size: 28px;">30</span> / 90</div>
+            <div style="border-left: 1px solid #30363d; padding-left: 15px;"><span class="hud-label">DINHEIRO</span><span style="color: #00ff66; font-size: 26px;">$16000</span></div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONTROLE DE TELAS ---
+        function openTeamSelect() {
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('team-select').style.display = 'flex';
+        }
+
+        let playerTeam = 'TR';
+        function startGame(team) {
+            playerTeam = team;
+            document.getElementById('team-select').style.display = 'none';
+            document.getElementById('game-hud').style.display = 'block';
+            document.body.requestPointerLock();
+        }
+
+        // --- MOTOR 3D (THREE.JS) ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87ceeb);
+        scene.fog = new THREE.FogExp2(0x87ceeb, 0.015);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(20, 40, 20);
+        scene.add(dirLight);
+
+        let isLocked = false;
+        document.addEventListener('pointerlockchange', () => {
+            isLocked = (document.pointerLockElement === document.body);
+        });
+
+        let yaw = 0, pitch = 0;
+        document.addEventListener('mousemove', (e) => {
+            if (!isLocked) return;
+            yaw -= e.movementX * 0.0022;
+            pitch -= e.movementY * 0.0022;
+            pitch = Math.max(-1.5, Math.min(1.5, pitch));
+        });
+
+        // Controles de Movimento
+        const move = { forward: false, backward: false, left: false, right: false, jump: false, crouch: false };
+        const velocity = new THREE.Vector3();
+        let isGrounded = false;
+        let playerHeight = 1.6;
+        let ammo = 30;
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'KeyW') move.forward = true;
+            if (e.code === 'KeyS') move.backward = true;
+            if (e.code === 'KeyA') move.left = true;
+            if (e.code === 'KeyD') move.right = true;
+            if (e.code === 'Space') move.jump = true;
+            if (e.code === 'ShiftLeft') move.crouch = true;
+            if (e.code === 'KeyR') { ammo = 30; document.getElementById('ammo').innerText = ammo; }
+            if (e.code === 'KeyM') switchMap();
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.code === 'KeyW') move.forward = false;
+            if (e.code === 'KeyS') move.backward = false;
+            if (e.code === 'KeyA') move.left = false;
+            if (e.code === 'KeyD') move.right = false;
+            if (e.code === 'Space') move.jump = false;
+            if (e.code === 'ShiftLeft') move.crouch = false;
+        });
+
+        // Arma do Jogador (Visão 1ª Pessoa)
+        const gunGroup = new THREE.Group();
+        const gunBody = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.12, 0.5), new THREE.MeshLambertMaterial({color: 0x222}));
+        gunBody.position.set(0.25, -0.2, -0.4);
+        camera.add(gunBody);
+        scene.add(camera);
+
+        // Sistema de Tiro
+        let targets = [];
+        document.addEventListener('mousedown', (e) => {
+            if (!isLocked || ammo <= 0) return;
+            ammo--;
+            document.getElementById('ammo').innerText = ammo;
+
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+            const hits = raycaster.intersectObjects(targets);
+            if (hits.length > 0) {
+                hits[0].object.material.color.setHex(0xff0000);
+                setTimeout(() => hits[0].object.material.color.setHex(0x8b5a2b), 200);
+            }
+        });
+
+        // Mapas
+        let mapObjects = [];
+        let mapIndex = 0;
+
+        function clearMap() {
+            mapObjects.forEach(obj => scene.remove(obj));
+            mapObjects = [];
+            targets = [];
+        }
+
+        function buildMap(type) {
+            clearMap();
+            const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshLambertMaterial({color: type === 0 ? 0xd2b48c : 0x1f1f2e}));
+            floor.rotation.x = -Math.PI / 2;
+            scene.add(floor);
+            mapObjects.push(floor);
+
+            const boxGeo = new THREE.BoxGeometry(2, 2, 2);
+            for(let i = -10; i <= 10; i += 5) {
+                if (i === 0) continue;
+                const box = new THREE.Mesh(boxGeo, new THREE.MeshLambertMaterial({color: 0x8b5a2b}));
+                box.position.set(i, 1, -10);
+                scene.add(box);
+                mapObjects.push(box);
+                targets.push(box);
+            }
+        }
+
+        function switchMap() {
+            mapIndex = (mapIndex + 1) % 2;
+            buildMap(mapIndex);
+            camera.position.set(0, playerHeight, 0);
+        }
+
+        buildMap(0);
+        camera.position.set(0, playerHeight, 0);
+
+        // Loop de Jogo
+        const clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = Math.min(clock.getDelta(), 0.1);
+
+            if (isLocked) {
+                camera.rotation.order = 'YXZ';
+                camera.rotation.y = yaw;
+                camera.rotation.x = pitch;
+
+                const speed = move.crouch ? 4 : 9;
+                const fwd = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+                const side = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+                
+                const dir = new THREE.Vector3();
+                if (move.forward) dir.add(fwd);
+                if (move.backward) dir.sub(fwd);
+                if (move.right) dir.add(side);
+                if (move.left) dir.sub(side);
+                dir.normalize();
+
+                const accel = isGrounded ? 50 : 15;
+                if (dir.length() > 0) {
+                    velocity.x += dir.x * accel * delta;
+                    velocity.z += dir.z * accel * delta;
+                }
+
+                if (isGrounded) { velocity.x *= 0.85; velocity.z *= 0.85; }
+                else { velocity.x *= 0.98; velocity.z *= 0.98; }
+
+                velocity.y -= 25 * delta;
+                if (move.jump && isGrounded) { velocity.y = 8.5; isGrounded = false; }
+
+                camera.position.addScaledVector(velocity, delta);
+
+                if (camera.position.y <= playerHeight) {
+                    camera.position.y = playerHeight;
+                    velocity.y = 0;
+                    isGrounded = true;
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>
