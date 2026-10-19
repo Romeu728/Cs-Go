@@ -287,7 +287,7 @@ function bombT(dt){bomb.t-=dt;bomb.m.scale.setScalar(1+Math.sin(T*(6+(40-bomb.t)
 function boom(){const p=bomb.p,c=V(p.x,1,p.z);nz(1.6,200,1);tn(60,1,.9,'sine',25);fx(c,0xff8a1c,24,12,1,5,1,0);fx(c,0x222222,20,10,2.5,6,0,0);for(const e of ents)if(e.alive){const d=e.p.distanceTo(p);if(d<30)hurt(e,400*(1-d/30),false,null,'Bomba')}endRound('TR');$('ban').textContent='A BOMBA EXPLODIU'}
 function botBomb(b,dt){if(phase!='live')return;if(b.team=='TR'&&!bomb&&siteOf(b.p,12)){b.pl=(b.pl||0)+dt;if(b.pl>2.5)plant(b.p)}else if(b.team=='CT'&&bomb&&b.p.distanceTo(bomb.p)<3){bomb.df+=dt;if(bomb.df>6){endRound('CT');$('ban').textContent='BOMBA DESARMADA'}}}
 function botNade(b,t,d){const k=b.gn.splice(Math.floor(R()*b.gn.length),1)[0],dir=t.p.clone().sub(b.p).setY(0).normalize(),v=dir.clone().multiplyScalar(Math.min(22,d*.9+6));v.y=Math.min(9,d*.2+3);b.gc=6+R()*8;mkG(k,eyeP(b).addScaledVector(dir,.5),v,b);if(b.team==P.team)radio(b,k=='he'?'Granada!':'Flash!')}
-/* ===== rounds =====
+/* ===== rounds ===== */
 function mkTeams(){for(const e of ents)sc.remove(e.m);ents=[];over=0;sc2={CT:0,TR:0};first=1;const nm=['Alfa','Bravo','Charlie','Delta','Echo','Foxtrot','Golf','Hotel','India'],my=S.team,en=my=='CT'?'TR':'CT';
  ents.push(P=mkBot(my,'Você',1));P.lt=9;P.shots=0;P.eh=1.62;for(let i=0;i<4;i++)ents.push(mkBot(my,nm[i]));for(let i=0;i<5;i++)ents.push(mkBot(en,nm[i+4]));bots=ents.filter(e=>!e.isP)}
 function newRound(){for(const g of GL)sc.remove(g.m);GL.length=0;for(const d of DR)sc.remove(d.m);DR.length=0;for(const s of SM)s.sp.forEach(q=>{sc.remove(q);q.material.dispose()});SM.length=0;UN=[];
